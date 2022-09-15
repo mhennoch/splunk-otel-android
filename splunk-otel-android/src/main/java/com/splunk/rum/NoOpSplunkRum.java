@@ -31,7 +31,7 @@ class NoOpSplunkRum extends SplunkRum {
     static final NoOpSplunkRum INSTANCE = new NoOpSplunkRum();
 
     private NoOpSplunkRum() {
-        super(null, null, null);
+        super(null, null, null, null);
     }
 
     @Override

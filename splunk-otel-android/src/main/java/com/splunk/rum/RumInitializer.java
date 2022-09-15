@@ -35,6 +35,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.SpanLimits;
@@ -99,6 +100,8 @@ class RumInitializer {
         initializationEvents.add(
                 new RumInitializer.InitializationEvent("sessionIdInitialized", timingClock.now()));
 
+        OverrideableIdGenerator idGenerator = new OverrideableIdGenerator(IdGenerator.random());
+
         SdkTracerProvider sdkTracerProvider =
                 buildTracerProvider(
                         Clock.getDefault(),
@@ -106,7 +109,8 @@ class RumInitializer {
                         sessionId,
                         rumVersion,
                         visibleScreenTracker,
-                        connectionUtil);
+                        connectionUtil,
+                        idGenerator);
         initializationEvents.add(
                 new RumInitializer.InitializationEvent(
                         "tracerProviderInitialized", timingClock.now()));
@@ -167,7 +171,7 @@ class RumInitializer {
 
         recordInitializationSpans(startTimeNanos, initializationEvents, tracer, config);
 
-        return new SplunkRum(openTelemetrySdk, sessionId, globalAttributes);
+        return new SplunkRum(openTelemetrySdk, idGenerator, sessionId, globalAttributes);
     }
 
     private SlowRenderingDetector buildSlowRenderingDetector(Config config, Tracer tracer) {
@@ -277,7 +281,8 @@ class RumInitializer {
             SessionId sessionId,
             String rumVersion,
             VisibleScreenTracker visibleScreenTracker,
-            ConnectionUtil connectionUtil) {
+            ConnectionUtil connectionUtil,
+            IdGenerator idGenerator) {
         BatchSpanProcessor batchSpanProcessor = BatchSpanProcessor.builder(zipkinExporter).build();
         initializationEvents.add(
                 new RumInitializer.InitializationEvent(
@@ -307,6 +312,7 @@ class RumInitializer {
                         .setClock(clock)
                         .addSpanProcessor(batchSpanProcessor)
                         .addSpanProcessor(attributeAppender)
+                        .setIdGenerator(idGenerator)
                         .setSpanLimits(
                                 SpanLimits.builder()
                                         .setMaxAttributeValueLength(MAX_ATTRIBUTE_LENGTH)

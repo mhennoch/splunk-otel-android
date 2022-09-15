@@ -35,6 +35,7 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import io.opentelemetry.instrumentation.okhttp.v3_0.OkHttpTelemetry;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
@@ -77,6 +78,7 @@ public class SplunkRum {
 
     private final SessionId sessionId;
     private final OpenTelemetrySdk openTelemetrySdk;
+    private final OverrideableIdGenerator idGenerator;
     private final AtomicReference<Attributes> globalAttributes;
 
     static {
@@ -86,9 +88,11 @@ public class SplunkRum {
 
     SplunkRum(
             OpenTelemetrySdk openTelemetrySdk,
+            OverrideableIdGenerator idGenerator,
             SessionId sessionId,
             AtomicReference<Attributes> globalAttributes) {
         this.openTelemetrySdk = openTelemetrySdk;
+        this.idGenerator = idGenerator;
         this.sessionId = sessionId;
         this.globalAttributes = globalAttributes;
     }
@@ -174,6 +178,10 @@ public class SplunkRum {
     @Deprecated
     public Interceptor createOkHttpRumInterceptor() {
         return createOkHttpTracing().newInterceptor();
+    }
+
+    public Scope overrideIdGeneration(String traceIdHex, String spanIdHex) {
+        return idGenerator.override(traceIdHex, spanIdHex);
     }
 
     /**
