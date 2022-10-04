@@ -51,6 +51,7 @@ public final class SplunkRumBuilder {
     int maxUsageMegabytes = DEFAULT_MAX_STORAGE_USE_MB;
     boolean sessionBasedSamplerEnabled = false;
     double sessionBasedSamplerRatio = 1.0;
+    boolean reactNativeSupportEnabled = false;
 
     /**
      * Sets the application name that will be used to identify your application in the Splunk RUM
@@ -136,6 +137,12 @@ public final class SplunkRumBuilder {
      */
     public SplunkRumBuilder enableDiskBuffering() {
         this.diskBufferingEnabled = true;
+        return this;
+    }
+
+
+    public SplunkRumBuilder enableReactNativeSupport() {
+        this.reactNativeSupportEnabled = true;
         return this;
     }
 

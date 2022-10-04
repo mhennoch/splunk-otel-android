@@ -27,7 +27,8 @@ public class CustomZipkinEncoderTest {
 
     @Test
     public void nameReplacement() {
-        CustomZipkinEncoder encoder = new CustomZipkinEncoder();
+        SplunkRumBuilder builder = new SplunkRumBuilder();
+        CustomZipkinEncoder encoder = new CustomZipkinEncoder(builder);
         Span span =
                 Span.newBuilder()
                         .name("lowercase")

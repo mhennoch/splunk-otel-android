@@ -16,6 +16,8 @@
 
 package com.splunk.rum;
 
+import android.util.Log;
+
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import zipkin2.Span;
@@ -35,6 +37,12 @@ import zipkin2.internal.WriteBuffer;
  */
 class CustomZipkinEncoder implements BytesEncoder<Span> {
 
+    private final SplunkRumBuilder builder;
+
+    public CustomZipkinEncoder(SplunkRumBuilder builder) {
+        this.builder = builder;
+    }
+
     private final WriteBuffer.Writer<Span> writer = new V2SpanWriter();
 
     @Override
@@ -50,6 +58,16 @@ class CustomZipkinEncoder implements BytesEncoder<Span> {
     @Override
     public byte[] encode(Span span) {
         String properSpanName = span.tags().get(RumAttributeAppender.SPLUNK_OPERATION_KEY.getKey());
+
+        if (this.builder.reactNativeSupportEnabled) {
+            String spanId = span.tags().remove("tmp.spanId");
+            String traceId = span.tags().remove("tmp.traceId");
+            Log.d("CustomZipkinEncoder", "custom encoder setting IDs: " + spanId + " " + traceId);
+
+            if (spanId != null && traceId != null) {
+                span = span.toBuilder().traceId(traceId).id(spanId).build();
+            }
+        }
 
         // note: this can be optimized, if necessary. Let's keep it simple for now.
         byte[] rawBytes = JsonCodec.write(this.writer, span);

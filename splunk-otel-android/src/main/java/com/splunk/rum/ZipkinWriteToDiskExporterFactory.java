@@ -30,7 +30,7 @@ class ZipkinWriteToDiskExporterFactory {
 
     private ZipkinWriteToDiskExporterFactory() {}
 
-    static ZipkinSpanExporter create(Application application, int maxUsageMegabytes) {
+    static ZipkinSpanExporter create(Application application, int maxUsageMegabytes, SplunkRumBuilder builder) {
         File spansPath = FileUtils.getSpansDirectory(application);
         if (!spansPath.exists()) {
             if (!spansPath.mkdirs()) {
@@ -57,7 +57,7 @@ class ZipkinWriteToDiskExporterFactory {
                         .storageLimiter(limiter)
                         .build();
         return ZipkinSpanExporter.builder()
-                .setEncoder(new CustomZipkinEncoder())
+                .setEncoder(new CustomZipkinEncoder(builder))
                 .setSender(sender)
                 // remove the local IP address
                 .setLocalIpAddressSupplier(() -> null)

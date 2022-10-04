@@ -392,7 +392,7 @@ class RumInitializer {
         return new LazyInitSpanExporter(
                 () ->
                         ZipkinWriteToDiskExporterFactory.create(
-                                application, builder.maxUsageMegabytes));
+                                application, builder.maxUsageMegabytes, this.builder));
     }
 
     // visible for testing
@@ -401,7 +401,7 @@ class RumInitializer {
         return new LazyInitSpanExporter(
                 () ->
                         ZipkinSpanExporter.builder()
-                                .setEncoder(new CustomZipkinEncoder())
+                                .setEncoder(new CustomZipkinEncoder(this.builder))
                                 .setEndpoint(endpoint)
                                 // remove the local IP address
                                 .setLocalIpAddressSupplier(() -> null)

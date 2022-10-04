@@ -53,6 +53,7 @@ public class Config {
     private final int maxUsageMegabytes;
     private final boolean sessionBasedSamplerEnabled;
     private final double sessionBasedSamplerRatio;
+    private final boolean reactNativeSupportEnabled;
 
     private Config(Builder builder) {
         this.beaconEndpoint = requireNonNull(builder.beaconEndpoint);
@@ -70,6 +71,7 @@ public class Config {
         this.maxUsageMegabytes = builder.maxUsageMegabytes;
         this.sessionBasedSamplerEnabled = builder.sessionBasedSamplerEnabled;
         this.sessionBasedSamplerRatio = builder.sessionBasedSamplerRatio;
+        this.reactNativeSupportEnabled = builder.reactNativeSupportEnabled;
     }
 
     private Attributes addDeploymentEnvironment(Builder builder) {
@@ -166,6 +168,12 @@ public class Config {
         return sessionBasedSamplerRatio;
     }
 
+    /** Experimental. Is react native support enabled or not. Needs separate RN agent also. */
+    public boolean isReactNativeSupportEnabled() {
+        return reactNativeSupportEnabled;
+    }
+
+
     /**
      * Create a new instance of the {@link Builder} class. All default configuration options will be
      * pre-populated.
@@ -186,6 +194,9 @@ public class Config {
         if (diskBufferingEnabled) {
             splunkRumBuilder.enableDiskBuffering();
         }
+        if (reactNativeSupportEnabled) {
+            splunkRumBuilder.enableReactNativeSupport();
+        }
         if (!crashReportingEnabled) {
             splunkRumBuilder.disableCrashReporting();
         }
@@ -198,6 +209,7 @@ public class Config {
         if (!slowRenderingDetectionEnabled) {
             splunkRumBuilder.disableSlowRenderingDetection();
         }
+
         splunkRumBuilder
                 .setSlowRenderingDetectionPollInterval(slowRenderingDetectionPollInterval)
                 .setGlobalAttributes(globalAttributes)
@@ -240,6 +252,7 @@ public class Config {
         private int maxUsageMegabytes = DEFAULT_MAX_STORAGE_USE_MB;
         private boolean sessionBasedSamplerEnabled = false;
         private double sessionBasedSamplerRatio = 1.0;
+        private boolean reactNativeSupportEnabled = false;
 
         /** Create a new instance of {@link Config} from the options provided. */
         public Config build() {
